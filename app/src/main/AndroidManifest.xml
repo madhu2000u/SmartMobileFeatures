@@ -20,14 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".IncomingCall_Receiver">
-            <intent-filter>
 
-                <action android:name="com.madhu.smartfeatues"/>
-                <action android:name="android.intent.action.PHONE_STATE" />
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
-            </intent-filter>
-        </receiver>
 
         <service android:name=".IncomingCallBackgroundService" android:enabled="true"/>
         <service android:name=".CreateNotification$StopService" android:enabled="true"/>

@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -30,21 +31,29 @@ import java.io.InputStreamReader;
 import java.security.Permission;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
 
-    private SensorManager mSensorManager;
-    private Sensor mProximity;
+    private SharedPreferences featurePreferences;
+    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent serviceIntent = new Intent(this, IncomingCallBackgroundService.class);
-        serviceIntent.putExtra("title", "Smart Mobile Features");
-        serviceIntent.putExtra("content","Smart Mobile Features is running in background to detect and respond " +
-                "to various events required for smart features");
-        ContextCompat.startForegroundService(this, serviceIntent);
+
+        serviceIntent= new Intent(this, IncomingCallBackgroundService.class);
+
+        featurePreferences=getSharedPreferences("Feature Settings", Context.MODE_PRIVATE);
+        if (!featurePreferences.getBoolean("auto-call",false))
+        {
+            Log.d("msg","Created new Preferences");
+            SharedPreferences.Editor editor=featurePreferences.edit();
+            editor.putBoolean("auto-call",false);
+            editor.apply();
+        }
+
+
 
         //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ANSWER_PHONE_CALLS}, 1);
         //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 2);
@@ -65,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         });*/
 
         Switch auto_callSwitch=findViewById(R.id.auto_attendCallSwitch);
+        auto_callSwitch.setChecked(featurePreferences.getBoolean("auto-call", false));
+        if (auto_callSwitch.isChecked()){startForeground(serviceIntent);}
         auto_callSwitch.setOnCheckedChangeListener(this);
 
 
@@ -74,16 +85,16 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     private void call() {
         Log.d("msg", "Inside call");
-        Log.d("msg","answer phone state "+(checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS)==PackageManager.PERMISSION_GRANTED));
-        Log.d("msg","read phone state  "+(checkSelfPermission(Manifest.permission.READ_PHONE_STATE)==PackageManager.PERMISSION_GRANTED));
-        Log.d("msg","process outgoing calls "+(checkSelfPermission(Manifest.permission.PROCESS_OUTGOING_CALLS)==PackageManager.PERMISSION_GRANTED));
-        if (checkSelfPermission(Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
+        Log.d("msg","answer phone state "+(ContextCompat.checkSelfPermission(this,Manifest.permission.ANSWER_PHONE_CALLS)==PackageManager.PERMISSION_GRANTED));
+        Log.d("msg","read phone state  "+(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE)==PackageManager.PERMISSION_GRANTED));
+        Log.d("msg","process outgoing calls "+(ContextCompat.checkSelfPermission(this,Manifest.permission.PROCESS_OUTGOING_CALLS)==PackageManager.PERMISSION_GRANTED));
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ANSWER_PHONE_CALLS}, 1);
         }
-        else if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        else if (ContextCompat.checkSelfPermission(this,Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
         }
-        else if (checkSelfPermission(Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED) {
+        else if (ContextCompat.checkSelfPermission(this,Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.PROCESS_OUTGOING_CALLS}, 1);
         }
 
@@ -113,22 +124,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
 
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        //if (sensorEvent.sensor.getType()==Sensor.TYPE_PROXIMITY)
-        /*{
-            if (sensorEvent.values[0]<=1) {
-                TelecomManager tm= (TelecomManager)this.getSystemService(Context.TELECOM_SERVICE);
-                tm.acceptRingingCall();
-                Log.d("msg", "Proximity distance - " + sensorEvent.values[0]);
-            }
-        }*/
-
-    }
-
-
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
 
 
     @Override
@@ -137,11 +132,26 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         switch (compoundButton.getId()){
 
             case R.id.auto_attendCallSwitch:
+                SharedPreferences.Editor editor=featurePreferences.edit();
+                editor.putBoolean("auto-call",b);
+                editor.apply();
+                if (b){
+                    startForeground(serviceIntent);
+                }else {
+                    stopService(serviceIntent);
+                }
 
         }
 
         Log.d("msg",""+compoundButton.getId());
 
+    }
+
+    private void startForeground(Intent serviceIntent){
+        serviceIntent.putExtra("title", "Smart Mobile Features");
+        serviceIntent.putExtra("content","Smart Mobile Features is running in background to detect and respond " +
+                "to various events required for smart features");
+        ContextCompat.startForegroundService(this, serviceIntent);
     }
 }
 

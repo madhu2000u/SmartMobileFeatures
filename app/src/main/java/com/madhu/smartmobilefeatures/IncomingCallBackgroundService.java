@@ -49,8 +49,8 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
         //Sensor mProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
         //mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
-        return START_STICKY;
-        //return super.onStartCommand(intent, flags, startId);
+        //return START_STICKY;
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
 
         IntentFilter intentFilter=new IntentFilter();
 
-        intentFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
+        intentFilter.addAction("android.intent.action.PHONE_STATE");
 
         intentFilter.setPriority(100);
 
@@ -77,6 +77,7 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
 
         Log.d("msg","Incoming call Service destroyed");
         unregisterReceiver(call_receiver);
+
         //Intent broadcastIntent=new Intent("com.madhu.smartfeatues");
 
         //sendBroadcast(broadcastIntent);

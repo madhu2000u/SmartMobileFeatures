@@ -11,10 +11,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.sip.SipSession;
 import android.os.IBinder;
 import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
@@ -23,21 +26,29 @@ public class IncomingCall_Receiver extends BroadcastReceiver implements SensorEv
     private SensorManager mSensorManager;
     private Sensor mProximity;
     private Context context;
+    private TelephonyManager telephonyManager;
 
 
     private float first=-1f, second=-1f;
     @Override
     public void onReceive(Context context, Intent intent) {
-        //if (intent.getAction()!=(Intent.ACTION_NEW_OUTGOING_CALL))
-        //{
-            Log.d("msg","Broadcast received "+ intent.getAction());
+        if (intent.getAction().equals("android.intent.action.PHONE_STATE"))
+        {
+            Log.d("msg"," inside if Broadcast received "+ intent.getAction()+context.getApplicationContext().getApplicationContext().getApplicationContext().getPackageName());
             this.context=context;
-            mSensorManager=(SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
-            mProximity=mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
 
-            mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+
+            telephonyManager=(TelephonyManager)context.getSystemService((Context.TELEPHONY_SERVICE));
+            if (telephonyManager.getCallState()==TelephonyManager.CALL_STATE_RINGING){
+                Log.d("msg","Ringing");
+                mSensorManager=(SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+                mProximity=mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                mSensorManager.registerListener(this, mProximity, SensorManager.SENSOR_DELAY_NORMAL);
+            }
             //Log.d("msg",)
-        //}
+        }
+
+        Log.d("msg","Broadcast received "+ intent.getAction());
 
         //Intent backgroundCallService=new Intent(context, IncomingCallBackgroundService.class);
         //context.startService(backgroundCallService);
@@ -46,6 +57,8 @@ public class IncomingCall_Receiver extends BroadcastReceiver implements SensorEv
 
 
     }
+
+
 
     @SuppressLint({"NewApi", "MissingPermission"}) //Permission already handled in MainActivity
     @Override
@@ -65,13 +78,18 @@ public class IncomingCall_Receiver extends BroadcastReceiver implements SensorEv
 
             if (first>second && first!=-1f && second!=-1f) { //Both values must be recorded before answering
                 Log.d("msg","first"+first);         //Bug where call is answered without even lifting it to ear
-                Log.d("msg","second"+second);       // when mobile is in pocket.
+                Log.d("msg","second"+second);       // when mobile is in pocket fixed.
                  TelecomManager tm= (TelecomManager)context.getSystemService(Context.TELECOM_SERVICE);
+
                  try {
+
+
+
                      tm.acceptRingingCall();
                      mSensorManager.unregisterListener(this);
+                     //mSensorManager.unregisterListener((SensorEventListener) context.getApplicationContext());
                  }catch (NullPointerException e){
-                     e.printStackTrace();
+                     Log.d("msg","Error" +e.getCause().getMessage());
                  }
                 Log.d("msg", "Proximity distance - " + sensorEvent.values[0]);
 
