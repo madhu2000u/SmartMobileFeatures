@@ -19,14 +19,18 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.Permission;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     private SensorManager mSensorManager;
     private Sensor mProximity;
@@ -35,6 +39,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent serviceIntent = new Intent(this, IncomingCallBackgroundService.class);
+        serviceIntent.putExtra("title", "Smart Mobile Features");
+        serviceIntent.putExtra("content","Smart Mobile Features is running in background to detect and respond " +
+                "to various events required for smart features");
+        ContextCompat.startForegroundService(this, serviceIntent);
 
         //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ANSWER_PHONE_CALLS}, 1);
         //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, 2);
@@ -46,13 +56,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //Intent backgroundCallService=new Intent(getApplicationContext(), IncomingCallBackgroundService.class);
         //startService(backgroundCallService);
 
-        Button callButton=findViewById(R.id.callButton);
+        /*Button callButton=findViewById(R.id.callButton);
         callButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 call();
             }
-        });
+        });*/
+
+        Switch auto_callSwitch=findViewById(R.id.auto_attendCallSwitch);
+        auto_callSwitch.setOnCheckedChangeListener(this);
+
+
+
+
     }
 
     private void call() {
@@ -79,11 +96,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         IncomingCall_Receiver call_receiver=new IncomingCall_Receiver();
         registerReceiver(call_receiver, intentFilter);*/
 
-        Intent serviceIntent = new Intent(this, IncomingCallBackgroundService.class);
-        serviceIntent.putExtra("title", "Smart Mobile Features");
-        serviceIntent.putExtra("content","Smart Mobile Features is running in background to detect and respond " +
-                "to various events required for smart features");
-        ContextCompat.startForegroundService(this, serviceIntent);
+
 
     }
 
@@ -99,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //mSensorManager.unregisterListener(this);
     }
 
-    @Override
+
     public void onSensorChanged(SensorEvent sensorEvent) {
         //if (sensorEvent.sensor.getType()==Sensor.TYPE_PROXIMITY)
         /*{
@@ -112,8 +125,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    @Override
+
     public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+        switch (compoundButton.getId()){
+
+            case R.id.auto_attendCallSwitch:
+
+        }
+
+        Log.d("msg",""+compoundButton.getId());
 
     }
 }

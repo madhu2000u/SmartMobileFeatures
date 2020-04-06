@@ -11,7 +11,9 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-public class IncomingCallBackgroundService extends Service {
+public class IncomingCallBackgroundService extends Service implements ServiceStop{
+
+    IncomingCall_Receiver call_receiver;
 
     private Context context;
     @Nullable
@@ -34,7 +36,7 @@ public class IncomingCallBackgroundService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
 
-        CreateNotification notification =new CreateNotification(this, intent.getStringExtra("title"), intent.getStringExtra("content"), pendingIntent);
+        CreateNotification notification =new CreateNotification(this, intent.getStringExtra("title"), intent.getStringExtra("content"), pendingIntent, this);
 
         notification.createNotificationChannel();
         Notification newNotification= notification.createNotification();
@@ -63,7 +65,7 @@ public class IncomingCallBackgroundService extends Service {
 
         intentFilter.setPriority(100);
 
-        IncomingCall_Receiver call_receiver=new IncomingCall_Receiver();
+        call_receiver=new IncomingCall_Receiver();
         registerReceiver(call_receiver, intentFilter);
 
 
@@ -73,10 +75,18 @@ public class IncomingCallBackgroundService extends Service {
     @Override
     public void onDestroy() {
 
-        Log.d("msg","Service destroyed");
+        Log.d("msg","Incoming call Service destroyed");
+        unregisterReceiver(call_receiver);
         //Intent broadcastIntent=new Intent("com.madhu.smartfeatues");
+
         //sendBroadcast(broadcastIntent);
         super.onDestroy();
+    }
+
+    @Override
+    public void stopService() {
+        Log.d("msg","Reached stopService()");
+        stopSelf();
     }
 
    /* @Override

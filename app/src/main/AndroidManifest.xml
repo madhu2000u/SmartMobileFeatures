@@ -30,6 +30,7 @@
         </receiver>
 
         <service android:name=".IncomingCallBackgroundService" android:enabled="true"/>
+        <service android:name=".CreateNotification$StopService" android:enabled="true"/>
     </application>
 
 </manifest>
