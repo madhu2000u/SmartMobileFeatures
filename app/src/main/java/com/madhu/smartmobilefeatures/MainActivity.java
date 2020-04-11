@@ -1,5 +1,6 @@
 package com.madhu.smartmobilefeatures;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -14,7 +15,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,13 +49,16 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         serviceIntent= new Intent(this, IncomingCallBackgroundService.class);
 
         featurePreferences=getSharedPreferences("Feature Settings", Context.MODE_PRIVATE);
-        if (!featurePreferences.getBoolean("auto-call",false))
+        if (featurePreferences.getString("newPref","null").equals("null"))
         {
             Log.d("msg","Created new Preferences");
             SharedPreferences.Editor editor=featurePreferences.edit();
+            editor.putString("newPref","exists");
             editor.putBoolean("auto-call",false);
             editor.apply();
         }
+
+
 
 
 
@@ -79,9 +86,40 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         auto_callSwitch.setOnCheckedChangeListener(this);
 
 
+        /*Button enable=findViewById(R.id.enable);
+        enable.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (checkDrawOverlyPermission()){
+                    startService(new Intent(getApplicationContext(), PowerButtonService.class));
+                }
+            }
+        });*/
+
+
 
 
     }
+
+    /*private boolean checkDrawOverlyPermission(){
+        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+            return true;
+        }
+        if (!Settings.canDrawOverlays(this)){
+            Intent overlayIntent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:"+ getPackageName()));
+            startActivityForResult(overlayIntent, 1);
+            return false;
+        }else return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode==1){
+            if (Settings.canDrawOverlays(this)){
+                startService(new Intent(this, PowerButtonService.class));
+            }
+        }
+    }*/
 
     private void call() {
         Log.d("msg", "Inside call");

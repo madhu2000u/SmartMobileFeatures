@@ -64,13 +64,16 @@ public class IncomingCall_Receiver extends BroadcastReceiver implements SensorEv
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
+        Log.d("msg","\n Sensor Even changed");
+        Log.d("msg", "Proximity distance - " + sensorEvent.values[0]);
+
 
         if (sensorEvent.sensor.getType()==Sensor.TYPE_PROXIMITY)
         {
 
-            if(sensorEvent.values[0]>1){
+            if(sensorEvent.values[0]>2){
                 first=sensorEvent.values[0];
-            }else if (sensorEvent.values[0]<=1 && first!=-1f){   //Record second event values only after first event value is recorded
+            }else if (sensorEvent.values[0]<=2 && first!=-1f){   //Record second event values only after first event value is recorded
                 second=sensorEvent.values[0];
             }
             Log.d("msg","outside if first"+first);
@@ -84,14 +87,18 @@ public class IncomingCall_Receiver extends BroadcastReceiver implements SensorEv
                  try {
 
 
-
+                    assert tm!=null;
                      tm.acceptRingingCall();
                      mSensorManager.unregisterListener(this);
-                     //mSensorManager.unregisterListener((SensorEventListener) context.getApplicationContext());
+                     first=-1; second=-1;       //Commit #3 Bug where value of first and second is not reverted back to -1 after accepting,
+                                                //call causing any subsequent call to be immediately answered because the values after the first
+                                                //ever call event will remain first=5, and second=0 here(in locally tested device) making the
+                                                //condition at line 81 true.  (Issue fixed by reverting member variables after accepting call)
+                     // mSensorManager.unregisterListener((SensorEventListener) context.getApplicationContext());
                  }catch (NullPointerException e){
                      Log.d("msg","Error" +e.getCause().getMessage());
                  }
-                Log.d("msg", "Proximity distance - " + sensorEvent.values[0]);
+                //Log.d("msg", "Proximity distance - " + sensorEvent.values[0]);
 
                 //stopSelf();
 

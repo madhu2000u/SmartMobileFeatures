@@ -3,8 +3,8 @@
     package="com.madhu.smartmobilefeatures">
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:allowBackup="true"
@@ -24,6 +24,7 @@
 
         <service android:name=".IncomingCallBackgroundService" android:enabled="true"/>
         <service android:name=".CreateNotification$StopService" android:enabled="true"/>
+        <service android:name=".PowerButtonService" android:enabled="true" android:exported="true"/>
     </application>
 
 </manifest>

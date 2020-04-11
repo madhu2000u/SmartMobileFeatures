@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.annotation.Nullable;
 
@@ -55,14 +56,17 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
 
     @Override
     public void onCreate() {
+
+
+
         super.onCreate();
+
         Log.d("msg","Service created");
 
 
         IntentFilter intentFilter=new IntentFilter();
 
         intentFilter.addAction("android.intent.action.PHONE_STATE");
-
         intentFilter.setPriority(100);
 
         call_receiver=new IncomingCall_Receiver();
@@ -72,8 +76,11 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
 
     }
 
+
     @Override
     public void onDestroy() {
+
+
 
         Log.d("msg","Incoming call Service destroyed");
         unregisterReceiver(call_receiver);
@@ -89,6 +96,9 @@ public class IncomingCallBackgroundService extends Service implements ServiceSto
         Log.d("msg","Reached stopService()");
         stopSelf();
     }
+
+
+
 
    /* @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
